@@ -4,7 +4,7 @@ import zipfile
 import os
 
 # כתובת הסרטון
-video_url = "https://www.youtube.com/watch?v=YOUR_VIDEO_ID"
+video_url = "https://www.youtube.com/watch?v=eqEBmyEYgVw"
 
 # שם קובץ ה-MP4 שיווצר
 output_filename = "video.mp4"
