@@ -18,6 +18,14 @@ jobs:
       - name: Install dependencies
         run: pip install yt-dlp
 
+      - name: Download cookies.txt from repository (if exists)
+        run: |
+          if [ -f cookies.txt ]; then
+            echo "cookies.txt found"
+          else
+            echo "No cookies.txt found"
+          fi
+
       - name: Download and zip video
         run: |
           python download_and_zip.py
