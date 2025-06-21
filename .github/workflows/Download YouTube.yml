@@ -1,0 +1,29 @@
+name: Download YouTube Video
+
+on:
+  workflow_dispatch:
+
+jobs:
+  download-and-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yt-dlp
+
+      - name: Download and zip video
+        run: |
+          python download_and_zip.py
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-video-zip
+          path: video.zip
