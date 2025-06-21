@@ -32,4 +32,4 @@ with zipfile.ZipFile(zip_filename, 'w') as zipf:
 # מחיקת קובץ ה-MP4 המקורי (אופציונלי)
 os.remove(output_filename)
 
-print(f"נוצר קובץ ZIP
+print(f"נוצר קובץ ZIP בשם: {zip_filename}")
