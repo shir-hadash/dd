@@ -18,6 +18,9 @@ jobs:
       - name: Install dependencies
         run: pip install yt-dlp
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Download cookies.txt from repository (if exists)
         run: |
           if [ -f cookies.txt ]; then
