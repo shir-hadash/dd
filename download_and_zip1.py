@@ -14,15 +14,6 @@ cookiefile = "cookies.txt" if os.path.exists("cookies.txt") else None
 # תבנית שם הקובץ: שם הסרטון + סיומת mp4
 output_template = "%(title)s.%(ext)s"
 
-ydl_opts = {
-    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
-    'outtmpl': output_template,
-    'merge_output_format': 'mp4'
-}
-if cookiefile:
-    ydl_opts['cookiefile'] = cookiefile
-
-# בדיקה אם הקישור הוא לערוץ או פלייליסט
 def is_playlist_or_channel(url):
     return (
         "playlist" in url or
@@ -31,12 +22,23 @@ def is_playlist_or_channel(url):
         "/c/" in url
     )
 
+ydl_opts = {
+    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
+    'outtmpl': output_template,
+    'merge_output_format': 'mp4',
+}
+
+if cookiefile:
+    ydl_opts['cookiefile'] = cookiefile
+
 if is_playlist_or_channel(video_url):
-    ydl_opts['playlistend'] = 10  # להוריד עד 10 סרטונים
+    ydl_opts['noplaylist'] = False
+    ydl_opts['playlistend'] = 10
+else:
+    ydl_opts['noplaylist'] = True
 
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(video_url, download=True)
-    # אם זה פלייליסט/ערוץ, info יהיה dict עם 'entries'
     if 'entries' in info:
         for entry in info['entries']:
             filename = ydl.prepare_filename(entry)
