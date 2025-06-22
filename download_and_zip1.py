@@ -22,8 +22,25 @@ ydl_opts = {
 if cookiefile:
     ydl_opts['cookiefile'] = cookiefile
 
+# בדיקה אם הקישור הוא לערוץ או פלייליסט
+def is_playlist_or_channel(url):
+    return (
+        "playlist" in url or
+        "/channel/" in url or
+        "/user/" in url or
+        "/c/" in url
+    )
+
+if is_playlist_or_channel(video_url):
+    ydl_opts['playlistend'] = 10  # להוריד עד 10 סרטונים
+
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     info = ydl.extract_info(video_url, download=True)
-    filename = ydl.prepare_filename(info)
-
-print(f"נשמר קובץ הווידאו בשם: {filename}")
+    # אם זה פלייליסט/ערוץ, info יהיה dict עם 'entries'
+    if 'entries' in info:
+        for entry in info['entries']:
+            filename = ydl.prepare_filename(entry)
+            print(f"נשמר קובץ הווידאו בשם: {filename}")
+    else:
+        filename = ydl.prepare_filename(info)
+        print(f"נשמר קובץ הווידאו בשם: {filename}")
