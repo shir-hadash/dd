@@ -1,35 +1,29 @@
-# דרישות: pip install yt-dlp
 import yt_dlp
-import zipfile
 import os
+import sys
 
-# כתובת הסרטון
-video_url = "https://www.youtube.com/watch?v=oXi-hFVZZ_o"
+# קבלת כתובת הסרטון מהפרמטרים
+if len(sys.argv) > 1:
+    video_url = sys.argv[1]
+else:
+    print("יש לספק כתובת סרטון יוטיוב כפרמטר.")
+    sys.exit(1)
 
-# שם קובץ ה-MP4 שיווצר
-output_filename = "video.mp4"
-
-# בדוק אם קיים קובץ cookies.txt בתיקייה הנוכחית
 cookiefile = "cookies.txt" if os.path.exists("cookies.txt") else None
 
-# הורדת הסרטון
+# תבנית שם הקובץ: שם הסרטון + סיומת mp4
+output_template = "%(title)s.%(ext)s"
+
 ydl_opts = {
     'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4',
-    'outtmpl': output_filename,
+    'outtmpl': output_template,
     'merge_output_format': 'mp4'
 }
 if cookiefile:
     ydl_opts['cookiefile'] = cookiefile
 
 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    ydl.download([video_url])
+    info = ydl.extract_info(video_url, download=True)
+    filename = ydl.prepare_filename(info)
 
-# דחיסת הקובץ ל-ZIP
-zip_filename = "video.zip"
-with zipfile.ZipFile(zip_filename, 'w') as zipf:
-    zipf.write(output_filename)
-
-# מחיקת קובץ ה-MP4 המקורי (אופציונלי)
-os.remove(output_filename)
-
-print(f"נוצר קובץ ZIP בשם: {zip_filename}")
+print(f"נשמר קובץ הווידאו בשם: {filename}")
