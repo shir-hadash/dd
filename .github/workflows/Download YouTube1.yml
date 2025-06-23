@@ -38,6 +38,7 @@ jobs:
           else
             echo "No cookies.txt found"
           fi
+          
       - name: Download and save video
         run: |
           if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
@@ -48,10 +49,12 @@ jobs:
             yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           else
-            echo "Unknown video type: ${{ github.event.inputs.video_type }}"
-            exit 1
+            # תמיכה ב-OTHER או כל אתר נתמך
+            TITLE=$(yt-dlp --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
+            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           fi
-
 
       - name: Upload video artifact
         uses: actions/upload-artifact@v4
