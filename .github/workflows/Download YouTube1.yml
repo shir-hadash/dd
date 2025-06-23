@@ -38,7 +38,6 @@ jobs:
           else
             echo "No cookies.txt found"
           fi
-
       - name: Download and save video
         run: |
           if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
@@ -52,6 +51,7 @@ jobs:
             echo "Unknown video type: ${{ github.event.inputs.video_type }}"
             exit 1
           fi
+
 
       - name: Upload video artifact
         uses: actions/upload-artifact@v4
