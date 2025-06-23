@@ -44,15 +44,15 @@ jobs:
           if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
             python download_and_zip1.py "${{ github.event.inputs.video_url }}"
           elif [ "${{ github.event.inputs.video_type }}" = "instagram" ] || [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
-            TITLE=$(yt-dlp --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
             SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
-            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            yt-dlp --cookies cookies.txt --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           else
             # תמיכה ב-OTHER או כל אתר נתמך
-            TITLE=$(yt-dlp --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
             SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
-            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            yt-dlp --cookies cookies.txt --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           fi
 
