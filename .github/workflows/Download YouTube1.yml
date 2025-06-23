@@ -43,12 +43,11 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
             python download_and_zip1.py "${{ github.event.inputs.video_url }}"
-          elif [ "${{ github.event.inputs.video_type }}" = "instagram" ]; then
-            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "video.%(ext)s" "${{ github.event.inputs.video_url }}"
-            zip instagram-video.zip video.*
-          elif [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
-            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "video.%(ext)s" "${{ github.event.inputs.video_url }}"
-            zip tiktok-video.zip video.*
+          elif [ "${{ github.event.inputs.video_type }}" = "instagram" ] || [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
+            TITLE=$(yt-dlp --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
+            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           else
             echo "Unknown video type: ${{ github.event.inputs.video_type }}"
             exit 1
