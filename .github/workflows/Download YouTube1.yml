@@ -1,11 +1,16 @@
-name: Download YouTube Video
+name: Download Video
 
 on:
   workflow_dispatch:
     inputs:
       video_url:
-        description: 'YouTube video URL'
+        description: 'Video URL'
         required: true
+        type: string
+      video_type:
+        description: 'Video Type (youtube/instagram)'
+        required: true
+        default: 'youtube'
         type: string
 
 jobs:
@@ -36,10 +41,20 @@ jobs:
 
       - name: Download and save video
         run: |
-          python download_and_zip1.py "${{ github.event.inputs.video_url }}"
+          if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
+            python download_and_zip1.py "${{ github.event.inputs.video_url }}"
+          elif [ "${{ github.event.inputs.video_type }}" = "instagram" ]; then
+            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "video.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip instagram-video.zip video.*
+          else
+            echo "Unknown video type: ${{ github.event.inputs.video_type }}"
+            exit 1
+          fi
 
       - name: Upload video artifact
         uses: actions/upload-artifact@v4
         with:
-          name: youtube-video
-          path: '*.mp4'
+          name: ${{ github.event.inputs.video_type }}-video
+          path: |
+            *.zip
+            *.mp4
