@@ -46,6 +46,9 @@ jobs:
           elif [ "${{ github.event.inputs.video_type }}" = "instagram" ]; then
             yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "video.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip instagram-video.zip video.*
+          elif [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
+            yt-dlp --ffmpeg-location /usr/bin/ffmpeg -o "video.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip tiktok-video.zip video.*
           else
             echo "Unknown video type: ${{ github.event.inputs.video_type }}"
             exit 1
