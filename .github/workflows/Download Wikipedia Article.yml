@@ -30,8 +30,8 @@ jobs:
       - name: Run Wikipedia HTML download script
         run: python download_wikipedia.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.lang }}"
 
-      - name: Upload HTML
+      - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          name: article-html
-          path: article.html
+          name: article-pdf
+          path: article.pdf
