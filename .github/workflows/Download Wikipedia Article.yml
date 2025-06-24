@@ -25,21 +25,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: |
-          pip install wikipedia-api requests beautifulsoup4
+        run: pip install requests
 
-      - name: Run Wikipedia download script
-        run: |
-          python download_wikipedia.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.lang }}"
+      - name: Run Wikipedia HTML download script
+        run: python download_wikipedia.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.lang }}"
 
-      - name: Upload article text
+      - name: Upload HTML
         uses: actions/upload-artifact@v4
         with:
-          name: article-text
-          path: article.txt
-
-      - name: Upload images
-        uses: actions/upload-artifact@v4
-        with:
-          name: article-images
-          path: images/
+          name: article-html
+          path: article.html
