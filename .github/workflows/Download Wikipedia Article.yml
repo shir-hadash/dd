@@ -1,0 +1,45 @@
+name: Download Wikipedia Article
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Wikipedia article title'
+        required: true
+        default: 'תל אביב'
+      lang:
+        description: 'Wikipedia language code'
+        required: false
+        default: 'he'
+
+jobs:
+  download-article:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install wikipedia-api requests beautifulsoup4
+
+      - name: Run Wikipedia download script
+        run: |
+          python download_wikipedia.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.lang }}"
+
+      - name: Upload article text
+        uses: actions/upload-artifact@v4
+        with:
+          name: article-text
+          path: article.txt
+
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: article-images
+          path: images/
