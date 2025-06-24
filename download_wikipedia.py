@@ -5,7 +5,10 @@ from bs4 import BeautifulSoup
 import os
 
 def download_wikipedia_article(title, lang="he"):
-    wiki = wikipediaapi.Wikipedia(lang)
+    wiki = wikipediaapi.Wikipedia(
+        language=lang,
+        user_agent="github-actions-bot/1.0 (https://github.com/shir-hadash/dd)"
+    )
     page = wiki.page(title)
     if not page.exists():
         print("הערך לא נמצא.")
