@@ -1,0 +1,24 @@
+name: Download Audio
+
+on:
+  workflow_dispatch:
+    inputs:
+      audio_url:
+        description: 'Audio/Video URL'
+        required: true
+        type: string
+      source_type:
+        description: 'Source Type (youtube/instagram/tiktok/other)'
+        required: true
+        default: 'youtube'
+        type: string
+
+jobs:
+  download-and-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses:
