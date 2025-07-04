@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-ffmpeg-4.4 # Unique cache key, change version as needed
 
       - name: Check FFmpeg cache hit status
-        run: echo "FFmpeg Cache Hit: ${{ steps.cache-ffmpeg.outputs.cache-hit }}"
+        run: echo ${{ steps.cache-ffmpeg.outputs.cache-hit }}
 
       - name: Download and install FFmpeg binary
         if: steps.cache-ffmpeg.outputs.cache-hit != 'true' # Download and install only if cache is missed
