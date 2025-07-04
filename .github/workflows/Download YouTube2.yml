@@ -24,12 +24,41 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install yt-dlp
 
-      - name: Install ffmpeg
-        run: sudo apt-get install -y ffmpeg
+      - name: Cache FFmpeg directory
+        id: cache-ffmpeg
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/ # Cache the directory where ffmpeg is placed
+          key: ${{ runner.os }}-ffmpeg-4.4 # Unique cache key, change version as needed
+
+      - name: Check FFmpeg cache hit status
+        run: echo "FFmpeg Cache Hit: ${{ steps.cache-ffmpeg.outputs.cache-hit }}"
+
+      - name: Download and install FFmpeg binary
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true' # Download and install only if cache is missed
+        run: |
+          echo "FFmpeg cache missed, downloading and installing..."
+          # Example download - adjust URL and commands as needed for your runner OS
+          FFMPEG_VERSION=4.4
+          FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+          mkdir -p ~/.local/bin
+          curl -L "$FFMPEG_URL" | tar xJ -C /tmp/
+          mv /tmp/ffmpeg-*-static/ffmpeg ~/.local/bin/
+          mv /tmp/ffmpeg-*-static/ffprobe ~/.local/bin/
+          rm -rf /tmp/ffmpeg-*-static
+          echo "FFmpeg downloaded and moved to ~/.local/bin/"
+          ls -l ~/.local/bin/ # List files in the target directory
+
+      - name: Verify FFmpeg installation from cache path
+        run: ~/.local/bin/ffmpeg -version # Verify ffmpeg is executable from the cached path
+
+      - name: Add FFmpeg to PATH
+        run: echo "~/.local/bin" >> $GITHUB_PATH
 
       - name: Download cookies.txt from repository (if exists)
         run: |
@@ -46,13 +75,13 @@ jobs:
           elif [ "${{ github.event.inputs.video_type }}" = "instagram" ] || [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
             TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
             SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
-            yt-dlp --cookies cookies.txt --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            yt-dlp --cookies cookies.txt --ffmpeg-location ~/.local/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           else
             # תמיכה ב-OTHER או כל אתר נתמך
             TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
             SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
-            yt-dlp --cookies cookies.txt --ffmpeg-location /usr/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            yt-dlp --cookies cookies.txt --ffmpeg-location ~/.local/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
             zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
           fi
 
