@@ -1,0 +1,90 @@
+
+name: Download Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'Video URL'
+        required: true
+        type: string
+      video_type:
+        description: 'Video Type (youtube/instagram)'
+        required: true
+        default: 'youtube'
+        type: string
+
+jobs:
+  download-and-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # Added caching for pip
+
+      - name: Install dependencies
+        run: pip install yt-dlp
+
+      # Removed: Install ffmpeg step
+
+      - name: Cache FFmpeg binary
+        id: cache-ffmpeg
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/ffmpeg # Path to cache the ffmpeg binary
+          key: ${{ runner.os }}-ffmpeg-4.4 # Unique cache key, change version as needed
+
+      - name: Download FFmpeg binary
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true' # Download only if cache is missed
+        run: |
+          # Example download - adjust URL and commands as needed for your runner OS
+          FFMPEG_VERSION=4.4
+          FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+          mkdir -p ~/.local/bin
+          curl -L "$FFMPEG_URL" | tar xJ -C /tmp/
+          mv /tmp/ffmpeg-*-static/ffmpeg ~/.local/bin/
+          mv /tmp/ffmpeg-*-static/ffprobe ~/.local/bin/
+          rm -rf /tmp/ffmpeg-*-static
+
+      - name: Add FFmpeg to PATH
+        run: echo "~/.local/bin" >> $GITHUB_PATH
+
+      - name: Download cookies.txt from repository (if exists)
+        run: |
+          if [ -f cookies.txt ]; then
+            echo "cookies.txt found"
+          else
+            echo "No cookies.txt found"
+          fi
+          
+      - name: Download and save video
+        run: |
+          if [ "${{ github.event.inputs.video_type }}" = "youtube" ]; then
+            python download_and_zip1.py "${{ github.event.inputs.video_url }}"
+          elif [ "${{ github.event.inputs.video_type }}" = "instagram" ] || [ "${{ github.event.inputs.video_type }}" = "tiktok" ]; then
+            TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
+            # Updated ffmpeg-location to use the cached binary path
+            yt-dlp --cookies cookies.txt --ffmpeg-location ~/.local/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
+          else
+            # תמיכה ב-OTHER או כל אתר נתמך
+            TITLE=$(yt-dlp --cookies cookies.txt --get-title "${{ github.event.inputs.video_url }}" | head -n 1)
+            SAFE_TITLE=$(echo "$TITLE" | tr -cd '[:alnum:] ._-')
+            # Updated ffmpeg-location to use the cached binary path
+            yt-dlp --cookies cookies.txt --ffmpeg-location ~/.local/bin/ffmpeg -o "${SAFE_TITLE}.%(ext)s" "${{ github.event.inputs.video_url }}"
+            zip "${SAFE_TITLE}.zip" "${SAFE_TITLE}."*
+          fi
+
+      - name: Upload video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.inputs.video_type }}-video
+          path: |
+            *.zip
+            *.mp4
